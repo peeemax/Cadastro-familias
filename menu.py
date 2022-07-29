@@ -5,19 +5,20 @@ from database import conexao
 
 # Menu do sistema
 
-
 def exibir_menu():
-    # Entrada para inicio do sistema
+    # Entrada para menu do sistema
     opcao = int(input('''Digite o número de sua opção para acessar:
     1 - Cadastrar uma família
     2 - Listar familias cadastradas
     3 - Atualizar dados familia
     4 - Deletar familia
-    5 - Sair'''))
+    5 - Sair
+    '''))
 
     # Condição para o menu continuar ou parar
     while opcao == 1 or 2 or 3 or 4:
 
+        # Conexão com banco de dados
         import mysql.connector
         conexao = mysql.connector.connect(
             host='localhost',
@@ -28,35 +29,37 @@ def exibir_menu():
 
         cursor = conexao.cursor()
 
-        # Condição da opção de cadastro de familia
+        # Cadastro de familia nova no banco de dados
         if opcao == 1:
 
             familia1 = Familia(input('Digite o sobrenome da familia: '),
                                input('Digite o Endereço da residência, com a cidade e estado separado por (-):'),
                                input('Digite a quantidade de membros da familia:'),
-                               (Pessoa(input('Digite o nome completo do membro?'),
-                                       input('Digite a data de nascimento. (DD/MM/AAAA)'),
-                                       input('Digite a idade (somente numeros).'),
-                                       input('Digite o CPF. (somente numeros)'))))
+                               membro_principal=(input('Digite o nome completo do membro.'),
+                                                 input('Digite a data de nascimento. (DD/MM/AAAA)'),
+                                                 input('Digite a idade. (somente numeros)'),
+                                                 input('Digite o CPF. (somente numeros)')))
 
-            print(familia1.nome, familia1.endereco, familia1.qtd_membros, familia1.membros)
-
+            # Comando para inserir e salvar dados inputados no banco de dados
             comando = f'INSERT INTO cadastro_familia (nome_familia, endereco, qtd_membros, membros) VALUES ' \
-                      f'("{familia1.nome}", "{familia1.endereco}", "{familia1.qtd_membros}", "{familia1.membros}")'
-
+                f'("{familia1.nome}", "{familia1.endereco}", "{familia1.qtd_membros}", "{familia1.membro_principal}")'
             cursor.execute(comando)
             conexao.commit()
+
+            print(f'Familia {familia1.nome} cadastrada com sucesso!')
 
             opcao = int(input('''Digite o número de sua opção para acessar:
                             1 - Cadastrar uma família
                             2 - Listar familias cadastradas
                             3 - Atualizar dados familia
                             4 - Deletar familia
-                            5 - Sair'''))
+                            5 - Sair
+                            '''))
 
-        # Vizualição das familias do banco de dados
+        # Vizualição das familias trazendo do banco de dados
         elif opcao == 2:
 
+            # Comando para trazer todos os dados das familias salvas no banco de dados
             comando = 'SELECT * FROM cadastro_familia'
 
             cursor.execute(comando)
@@ -68,13 +71,15 @@ def exibir_menu():
                             2 - Listar familias cadastradas
                             3 - Atualizar dados familia
                             4 - Deletar familia
-                            5 - Sair'''))
+                            5 - Sair
+                            '''))
 
+        # Alteração de dados de familia no banco de dados
         elif opcao == 3:
 
             alteracao = input('Digite o nome da familia.')
 
-            update = input('Digite qual dado quer alterar (endereco, qtd_membros ou membros)')
+            update = input('Digite qual dado quer alterar (endereco, qtd_membros ou membro)')
 
             if update == 'endereco':
 
@@ -92,21 +97,25 @@ def exibir_menu():
                 cursor.execute(comando)
                 conexao.commit()
 
-            elif update == 'membros':
+            elif update == 'membro':
 
-                membro_alterado = input('Digite a alteração do membro.')
-                comando = f'UPDATE cadastro_familia SET endereco = "{membro_alterado}" WHERE nome_familia = "{alteracao}"'
+                membro_principal_alterado = input('Digite a alteração do membro.')
+                comando = f'UPDATE cadastro_familia SET endereco = "{membro_principal_alterado}" WHERE nome_familia = "{alteracao}"'
 
                 cursor.execute(comando)
                 conexao.commit()
+
+                print(f'Atualização da familia {alteracao} concluída com sucesso!')
 
             opcao = int(input('''Digite o número de sua opção para acessar:
                                             1 - Cadastrar uma família
                                             2 - Listar familias cadastradas
                                             3 - Atualizar dados familia
                                             4 - Deletar familia
-                                            5 - Sair'''))
+                                            5 - Sair
+                                            '''))
 
+        # Exclusão de familia do banco de dados
         elif opcao == 4:
 
             familia = input('Digite o nome da familia que deseja excluir.')
@@ -115,15 +124,20 @@ def exibir_menu():
             cursor.execute(comando)
             conexao.commit()
 
-        opcao = int(input('''Digite o número de sua opção para acessar:
+            print(f'Exclusão da familia {familia} concluída com sucesso!')
+
+            opcao = int(input('''Digite o número de sua opção para acessar:
                                                     1 - Cadastrar uma família
                                                     2 - Listar familias cadastradas
                                                     3 - Atualizar dados familia
                                                     4 - Deletar familia
-                                                    5 - Sair'''))
+                                                    5 - Sair
+                                                    '''))
+        # Encerramento do menu
+        elif opcao == 5:
+            break
 
-        break
-
+        # Encerramento banco de dados
         cursor.close()
         conexao.close()
 

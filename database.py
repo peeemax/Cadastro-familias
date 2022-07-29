@@ -10,19 +10,10 @@ conexao = mysql.connector.connect(
     database='bdcadastrofamilia',
     )
 
-    # Execução dos comandos da conexão
+# Execução dos comandos da conexão
 cursor = conexao.cursor()
 
-    # CRUD
-
-    # CREATE
-comando = 'SELECT * FROM cadastro_familia'
-cursor.execute(comando)
-# conexao.commit()  # Editando banco de dados
-resultado = cursor.fetchall()  # Lendo banco de dados
-print(resultado)
-
-    # Cncerramento e fechamento do banco
+# Encerramento e fechamento do banco
 cursor.close()
 conexao.close()
 
