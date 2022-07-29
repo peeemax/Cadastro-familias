@@ -1,67 +1,131 @@
 # Função de menu de acesso às funções do software:
 from cadastro_familia import Familia, Pessoa
+from database import conexao
+
+
+# Menu do sistema
 
 
 def exibir_menu():
+    # Entrada para inicio do sistema
     opcao = int(input('''Digite o número de sua opção para acessar:
     1 - Cadastrar uma família
     2 - Listar familias cadastradas
-    3 - Procurar dados de uma familia
-    '''))
+    3 - Atualizar dados familia
+    4 - Deletar familia
+    5 - Sair'''))
 
-    while opcao == 1 or 2 or 3:
+    # Condição para o menu continuar ou parar
+    while opcao == 1 or 2 or 3 or 4:
 
+        import mysql.connector
+        conexao = mysql.connector.connect(
+            host='localhost',
+            user='Maximiano',
+            password='Pemax1992',
+            database='bdcadastrofamilia',
+        )
+
+        cursor = conexao.cursor()
+
+        # Condição da opção de cadastro de familia
         if opcao == 1:
 
-            deseja_novo_cadastro = 'Sim'
-
-            while deseja_novo_cadastro == 'Sim':
-
-                familia1 = Familia(input('Digite o sobrenome da familia: '),
-                                   input('Digite o Endereço da residência, com a cidade e estado separado por (-):'),
-                                   input('Digite a quantidade de membros da familia:'),
-                                   (Pessoa(input('Digite o nome completo do membro?'),
-                                          input('Digite a data de nascimento. (DD/MM/AAAA)'),
-                                          input('Digite a idade (somente numeros).'),
-                                          input('Digite o CPF. (somente numeros)'))))
-
-                print(familia1.nome, familia1.endereco, familia1.qtd_membros, familia1.membros)
-
-                deseja_novo_cadastro = input('Deseja fazer um novo cadastro de familia? (Digite Sim/Não)')
-
-                if deseja_novo_cadastro == 'Sim':
-                    familia2 = Familia(input('Digite o sobrenome da familia: '),
-                                       input(
-                                           'Digite o Endereço da residência, com a cidade e estado separado por (-):'),
-                                       input('Digite a quantidade de membros da familia:'),
-                                       input('Digite o nome dos membros, separado por vírgula: '))
-
-                    print(familia2.nome, familia2.endereco, familia2.qtd_membros, familia2.membros)
-
-                    deseja_novo_cadastro = input('Deseja fazer um novo cadastro de familia? (Digite Sim/Não)')
-
-                    print('Obrigado')
-
-        elif opcao == 2:
+            familia1 = Familia(input('Digite o sobrenome da familia: '),
+                               input('Digite o Endereço da residência, com a cidade e estado separado por (-):'),
+                               input('Digite a quantidade de membros da familia:'),
+                               (Pessoa(input('Digite o nome completo do membro?'),
+                                       input('Digite a data de nascimento. (DD/MM/AAAA)'),
+                                       input('Digite a idade (somente numeros).'),
+                                       input('Digite o CPF. (somente numeros)'))))
 
             print(familia1.nome, familia1.endereco, familia1.qtd_membros, familia1.membros)
 
-            print(familia2.nome, familia2.endereco, familia2.qtd_membros, familia2.membros)
+            comando = f'INSERT INTO cadastro_familia (nome_familia, endereco, qtd_membros, membros) VALUES ' \
+                      f'("{familia1.nome}", "{familia1.endereco}", "{familia1.qtd_membros}", "{familia1.membros}")'
 
+            cursor.execute(comando)
+            conexao.commit()
+
+            opcao = int(input('''Digite o número de sua opção para acessar:
+                            1 - Cadastrar uma família
+                            2 - Listar familias cadastradas
+                            3 - Atualizar dados familia
+                            4 - Deletar familia
+                            5 - Sair'''))
+
+        # Vizualição das familias do banco de dados
+        elif opcao == 2:
+
+            comando = 'SELECT * FROM cadastro_familia'
+
+            cursor.execute(comando)
+            resultado = cursor.fetchall()
+            print(resultado)
+
+            opcao = int(input('''Digite o número de sua opção para acessar:
+                            1 - Cadastrar uma família
+                            2 - Listar familias cadastradas
+                            3 - Atualizar dados familia
+                            4 - Deletar familia
+                            5 - Sair'''))
 
         elif opcao == 3:
 
-            print('Fazer a busca')
+            alteracao = input('Digite o nome da familia.')
+
+            update = input('Digite qual dado quer alterar (endereco, qtd_membros ou membros)')
+
+            if update == 'endereco':
+
+                endereco_alterado = input('Digite o novo endereço.')
+                comando = f'UPDATE cadastro_familia SET endereco = "{endereco_alterado}" WHERE nome_familia = "{alteracao}"'
+
+                cursor.execute(comando)
+                conexao.commit()
+
+            elif update == 'qtd_membros':
+
+                qtd_alterado = input('Digite o nova quantidade de membros.')
+                comando = f'UPDATE cadastro_familia SET endereco = "{qtd_alterado}" WHERE nome_familia = "{alteracao}"'
+
+                cursor.execute(comando)
+                conexao.commit()
+
+            elif update == 'membros':
+
+                membro_alterado = input('Digite a alteração do membro.')
+                comando = f'UPDATE cadastro_familia SET endereco = "{membro_alterado}" WHERE nome_familia = "{alteracao}"'
+
+                cursor.execute(comando)
+                conexao.commit()
+
+            opcao = int(input('''Digite o número de sua opção para acessar:
+                                            1 - Cadastrar uma família
+                                            2 - Listar familias cadastradas
+                                            3 - Atualizar dados familia
+                                            4 - Deletar familia
+                                            5 - Sair'''))
+
+        elif opcao == 4:
+
+            familia = input('Digite o nome da familia que deseja excluir.')
+            comando = f'DELETE FROM cadastro_familia WHERE nome_familia = "{familia}"'
+
+            cursor.execute(comando)
+            conexao.commit()
 
         opcao = int(input('''Digite o número de sua opção para acessar:
-            1 - Cadastrar uma família
-            2 - Listar familias cadastradas
-            3 - Procurar dados de uma familia
-            4 - Sair
-            '''))
+                                                    1 - Cadastrar uma família
+                                                    2 - Listar familias cadastradas
+                                                    3 - Atualizar dados familia
+                                                    4 - Deletar familia
+                                                    5 - Sair'''))
 
-        if opcao == 4:
-            break
+        break
+
+        cursor.close()
+        conexao.close()
 
 
 exibir_menu()
